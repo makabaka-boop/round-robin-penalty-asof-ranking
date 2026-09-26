@@ -3,6 +3,7 @@ from __future__ import annotations
 from flask import Flask, jsonify, request
 
 from .ranking import rank_payload
+from .round_ranking import rank_round_payload
 
 
 def create_app() -> Flask:
@@ -17,6 +18,14 @@ def create_app() -> Flask:
         payload = request.get_json(silent=True)
         try:
             return jsonify(rank_payload(payload))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+    @app.post("/api/rankings/at-round")
+    def rankings_at_round():
+        payload = request.get_json(silent=True)
+        try:
+            return jsonify(rank_round_payload(payload))
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
 

@@ -134,7 +134,7 @@ input:focus {
 
 .match-row {
   display: grid;
-  grid-template-columns: 1fr 58px 14px 58px 1fr;
+  grid-template-columns: 1fr 58px 14px 58px 1fr 64px;
   align-items: center;
   gap: 8px;
 }
@@ -153,6 +153,66 @@ input:focus {
 .score {
   padding: 7px;
   text-align: center;
+}
+
+.round {
+  padding: 7px;
+  text-align: center;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: #6b7280;
+}
+
+.empty {
+  margin: 0;
+  color: #94a3b8;
+}
+
+.penalty-row,
+.appeal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 84px 84px auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.appeal-row {
+  grid-template-columns: 1fr 84px auto;
+}
+
+select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+  background: #fff;
+}
+
+select:focus {
+  outline: 2px solid #93c5fd;
+  border-color: #2563eb;
+}
+
+.round-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.round-controls label {
+  display: grid;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.round-controls input {
+  width: 110px;
 }
 
 .actions {
@@ -238,6 +298,10 @@ th {
   }
 
   .match-row {
-    grid-template-columns: 1fr 48px 10px 48px 1fr;
+    grid-template-columns: 1fr 48px 10px 48px 1fr 52px;
+  }
+
+  .penalty-row {
+    grid-template-columns: 1fr 1fr 64px 64px auto;
   }
 }
