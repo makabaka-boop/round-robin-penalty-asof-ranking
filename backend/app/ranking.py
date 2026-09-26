@@ -5,12 +5,16 @@ first split by points earned only in games between teams currently in the
 same group.  The surviving subgroups recalculate their head-to-head points.
 When that cannot separate a group, global goal difference, global goals for
 and ASCII byte order of the team id are applied together.
+
+``rank_teams`` is the shared engine: it ranks teams by a caller supplied
+points value (raw match points, or match points minus active deductions)
+while head-to-head groups are always computed from the played matches alone.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 from uuid import uuid4
 
 
@@ -142,7 +146,7 @@ def _ordered_group(teams: Iterable[str], stats: dict[str, TeamStat]) -> list[str
 
 
 def _partition_by(
-    teams: list[str], key_function
+    teams: list[str], key_function: Callable[[str], Any]
 ) -> list[list[str]]:
     """Partition an already ordered list into adjacent equal-key blocks."""
     if not teams:
@@ -229,14 +233,24 @@ def _resolve_group(
     return result
 
 
-def compute_rankings(teams: list[str], matches: list[dict[str, Any]]) -> dict[str, Any]:
-    """Return complete order and all grouping decisions."""
-    stats = calculate_stats(teams, matches)
+def rank_teams(
+    teams: list[str],
+    matches: list[dict[str, Any]],
+    stats: dict[str, TeamStat],
+    total_points_of: Callable[[str], int],
+    root_basis: str,
+) -> tuple[list[str], list[dict[str, Any]]]:
+    """Rank teams with the recursive rules.
 
+    ``stats`` supplies the global goal figures used at every depth; ``matches``
+    supply the played games used for head-to-head points.  ``total_points_of``
+    defines the value of the root grouping (raw points, or points adjusted by
+    deductions).  ``root_basis`` names the root trace event.
+    """
     # A canonical order here makes recursive tie-breaking independent of the
     # order in which teams or matches were supplied.
-    root_ordered = sorted(teams, key=lambda team: (-stats[team].points, _ascii_key(team)))
-    root_groups = _partition_by(root_ordered, lambda team: stats[team].points)
+    root_ordered = sorted(teams, key=lambda team: (-total_points_of(team), _ascii_key(team)))
+    root_groups = _partition_by(root_ordered, total_points_of)
 
     trace: list[dict[str, Any]] = []
     ranked: list[str] = []
@@ -244,18 +258,29 @@ def compute_rankings(teams: list[str], matches: list[dict[str, Any]]) -> dict[st
         if len(group) == 1:
             ranked.extend(group)
         else:
+            sorted_group = sorted(group, key=_ascii_key)
             trace.append(
                 {
                     "depth": 0,
-                    "teams": sorted(group, key=_ascii_key),
-                    "basis": "total_points",
-                    "points": _point_values(
-                        sorted(group, key=_ascii_key), stats
-                    ),
-                    "partitions": [sorted(part, key=_ascii_key) for part in [group]],
+                    "teams": sorted_group,
+                    "basis": root_basis,
+                    "points": {
+                        team: {"id": team, "points": total_points_of(team)}
+                        for team in sorted_group
+                    },
+                    "partitions": [sorted_group],
                 }
             )
             ranked.extend(_resolve_group(set(group), 1, stats, matches, trace))
+    return ranked, trace
+
+
+def compute_rankings(teams: list[str], matches: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return complete order and all grouping decisions."""
+    stats = calculate_stats(teams, matches)
+    ranked, trace = rank_teams(
+        teams, matches, stats, lambda team: stats[team].points, "total_points"
+    )
 
     standings = [
         {

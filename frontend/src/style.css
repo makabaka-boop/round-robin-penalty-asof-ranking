@@ -37,6 +37,77 @@ header h1 {
   color: #4b5563;
 }
 
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  border-bottom: 1px solid #d8dee9;
+}
+
+.tab {
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 10px 18px;
+  color: #64748b;
+  background: transparent;
+  font-weight: 700;
+}
+
+.tab:hover:not(:disabled) {
+  background: transparent;
+  color: #2563eb;
+}
+
+.tab.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.round-label {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: #475569;
+  font-size: 14px;
+}
+
+.round-input {
+  width: 72px;
+  text-align: center;
+}
+
+.penalties-table input,
+.penalties-table select {
+  padding: 6px 8px;
+}
+
+.penalty-id {
+  min-width: 90px;
+}
+
+.penalty-round,
+.penalty-deduction,
+.appeal-round {
+  width: 92px;
+  text-align: center;
+}
+
+.as-of-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+}
+
+.penalty-refs {
+  color: #6b7280;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 .card {
   margin-top: 22px;
   padding: 22px;
